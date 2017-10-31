@@ -7,6 +7,10 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
+.style2-border:after {
+	background: #1c1d26 !important;
+}
+
 .blog-content {
 	margin-top:-50px;
 	font-size:18px;
@@ -28,6 +32,10 @@
 
 .blog-content .large {
 	width:75%;
+}
+
+.blog-content .medium {
+	width:50%;
 }
 
 .blog-content .small {

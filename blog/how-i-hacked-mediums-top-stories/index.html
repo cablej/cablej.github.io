@@ -1,19 +1,14 @@
 <!DOCTYPE HTML>
-<!--
-	Landed by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 	<head>
-		<title>How I Hacked Medium’s Top Stories | Lightning Security</title>
+		<title>How I Hacked Medium’s Top Stories</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="How I Hacked Medium’s Top Stories">
-
-
+		
+	  <meta name="author" content="Jack Cable">
 		<meta name="og:title" content="How I Hacked Medium’s Top Stories">
-		<meta property="og:image" content="http://lightningsecurity.io/images/banner.jpg">
+		<meta property="og:image" content="http://cablej.github.io/images/banner.jpg">
 
 		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
 		<link rel="stylesheet" href="../../assets/css/main.css" />
@@ -35,11 +30,10 @@
 
 			<!-- Header -->
 				<header id="header">
-					<h1 id="logo"><a href="/">Lightning Security</a></h1>
+					<h1 id="logo"><a href="/">Jack Cable's Blog</a></h1>
 					<nav id="nav">
 						<ul>
-							<li><a href="/blog">Blog</a></li>
-							<li><a class="button special" href="/index.html#five">Get Started</a></li>
+							<li><a href="/">Index</a></li>
 						</ul>
 					</nav>
 				</header>
@@ -85,7 +79,7 @@
 				</div>
 
 			<!-- Footer -->
-				<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
+				<!--<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
 					<div class="container">
 						<header>
 							<h2>Like our findings? They could be yours.</h2>
@@ -106,14 +100,12 @@
 							</div>
 						</div>
 					</div>
-				</section>
+				</section>-->
 				<footer id="footer">
 					<ul class="icons">
-						<li><a href="mailto:jackhcable@gmail.com" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+						<li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
 					</ul>
-					<ul class="copyright">
-						<li>&copy; Jack Cable LLC. All rights reserved.</li>
-					</ul>
+					
 				</footer>
 
 		</div>
@@ -127,30 +119,6 @@
 			<script src="../../assets/js/util.js"></script>
 			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="../../assets/js/main.js"></script>
-			<script>
-				var email = 'jackhcable@gmail.com'
-				function onSubmitForm() {
-					$.ajax({
-					    url: "https://formspree.io/" + email, 
-					    method: "POST",
-					    data: {
-					    	'email': $('#email').val(),
-							'_replyto': $('#email').val(),
-					    	'_subject': '[Lightning Security] Contact from ' + $('#name').val(),
-					    	'name': $('#name').val(),
-					    	'_format': 'plain',
-					    	'message': $('#message').val()
-					    },
-					    dataType: "json",
-					    success: function() {
-					    	$('#result').text('Thanks for contacting us! We will reply within 24 hours.')
-					    },
-					    error: function() {
-					    	$('#result').html('Error sending message, please try again or email <a style="color:white" href="mailto:' + email + '">' + email + '</a>.')
-					    }
-					});
-				}
-			</script>
 			<script>window.twttr = (function(d, s, id) {
 			  var js, fjs = d.getElementsByTagName(s)[0],
 			    t = window.twttr || {};

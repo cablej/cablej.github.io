@@ -1,12 +1,7 @@
 <!DOCTYPE HTML>
-<!--
-	Landed by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 	<head>
-		<title>Blog | Lightning Security</title>
+		<title>Jack Cable's Blog</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
@@ -29,11 +24,10 @@
 
 			<!-- Header -->
 				<header id="header">
-					<h1 id="logo"><a href="/">Lightning Security</a></h1>
+					<h1 id="logo"><a href="/">Jack Cable's Blog</a></h1>
 					<nav id="nav">
 						<ul>
-							<li><a href="/blog">Blog</a></li>
-							<li><a class="button special" href="/index.html#five">Get Started</a></li>
+							<li><a href="/">Index</a></li>
 						</ul>
 					</nav>
 				</header>
@@ -42,12 +36,16 @@
 				<div id="main" class="wrapper style1">
 					<div class="container">
 						<header class="major">
-							<h1 class="blog-title">Lightning Security Blog</h1>
-							<p>Security findings by Jack Cable</p>
+							<h1 class="blog-title">Jack Cable's Blog</h1>
+							<p>My random, sometimes organized thoughts on computer security.</p>
 						</header>
 
 						<!-- Content -->
 							<center>
+								<h3><a href="linkedin">LinkedIn AutoFill Exposed Visitor Name, Email to Third-Party Websites</a></h3><p>April 19, 2018</p>
+								<h3><a href="bypassing-payments-using-webhooks">Bypassing Payment Using Webhooks</a></h3><p>March 13, 2018</p>
+								<h3><a href="host-header-injection">Don't Trust the Host Header for Sending Password Reset Emails</a></h3><p>December 13, 2017</p>
+								<h3><a href="race-conditions">Exploiting and Protecting Against Race Conditions</a></h3><p>November 1, 2017</p>
 								<h3><a href="password-not-provided">Password Not Provided - Compromising Any Flurry User's Account [Yahoo Bug Bounty]</a></h3><p>August 15, 2017</p>
 								<h3><a href="how-i-hacked-mediums-top-stories">How I Hacked Medium’s Top Stories</a></h3>
 								<p>August 7, 2017</p>
@@ -60,11 +58,9 @@
 				
 				<footer id="footer">
 					<ul class="icons">
-						<li><a href="mailto:jackhcable@gmail.com" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+						<li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
 					</ul>
-					<ul class="copyright">
-						<li>&copy; Jack Cable LLC. All rights reserved.</li>
-					</ul>
+					
 				</footer>
 
 		</div>
@@ -78,30 +74,6 @@
 			<script src="../assets/js/util.js"></script>
 			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="../assets/js/main.js"></script>
-			<script>
-				var email = 'jackhcable@gmail.com'
-				function onSubmitForm() {
-					$.ajax({
-					    url: "https://formspree.io/" + email, 
-					    method: "POST",
-					    data: {
-					    	'email': $('#email').val(),
-							'_replyto': $('#email').val(),
-					    	'_subject': '[Lightning Security] Contact from ' + $('#name').val(),
-					    	'name': $('#name').val(),
-					    	'_format': 'plain',
-					    	'message': $('#message').val()
-					    },
-					    dataType: "json",
-					    success: function() {
-					    	$('#result').text('Thanks for contacting us! We will reply within 24 hours.')
-					    },
-					    error: function() {
-					    	$('#result').html('Error sending message, please try again or email <a style="color:white" href="mailto:' + email + '">' + email + '</a>.')
-					    }
-					});
-				}
-			</script>
 
 	</body>
 </html>

@@ -1,21 +1,17 @@
 <!DOCTYPE HTML>
-<!--
-	Landed by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 	<head>
-		<title>Exploiting and Protecting Against Race Conditions | Lightning Security</title>
+		<title>Exploiting and Protecting Against Race Conditions</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
 		<link rel="stylesheet" href="../../assets/css/main.css" />
 
-		<meta name="description" content="Password Not Provided - Compromising Any Flurry User's Account [Yahoo Bug Bounty]">
+	  <meta name="author" content="Jack Cable">
+		<meta name="description" content="Race conditions are a severe but prevalent vulnerability type. Learn how to both exploit and protect against race conditions.">
 
-		<meta name="og:title" content="Password Not Provided - Compromising Any Flurry User's Account [Yahoo Bug Bounty]">
-		<meta property="og:image" content="http://lightningsecurity.io/images/banner.jpg">
+		<meta name="og:title" content="Exploiting and Protecting Against Race Conditions">
+		<meta property="og:image" content="http://cablej.github.io/images/banner.jpg">
 
 		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
 		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
@@ -36,11 +32,10 @@
 
 			<!-- Header -->
 				<header id="header">
-					<h1 id="logo"><a href="/">Lightning Security</a></h1>
+					<h1 id="logo"><a href="/">Jack Cable's Blog</a></h1>
 					<nav id="nav">
 						<ul>
-							<li><a href="/blog">Blog</a></li>
-							<li><a class="button special" href="/index.html#five">Get Started</a></li>
+							<li><a href="/">Index</a></li>
 						</ul>
 					</nav>
 				</header>
@@ -50,7 +45,7 @@
 					<div class="container">
 						<header class="major">
 							<h1 class="blog-title" style="font-size:1.75em">Exploiting and Protecting Against Race Conditions</h1>
-							<p>Jack Cable - September 15, 2017</p>
+							<p>Jack Cable - November 1, 2017</p>
 						</header>
 
 						<!-- Content -->
@@ -76,7 +71,7 @@
 								<p id="error"></p>
 								<p>Your account balance: $<span id="your-balance"></span> - <a href="javascript:updateBalance()">Refresh balance</a></p>
 								<p>Your friend&#39;s account: $<span id="friends-balance"></span></p>
-								<div style="display:inline"><label for="amount">Amount to send:</label><input id="amount" type="text" style="width:150px" value="75"></input><br><a href="javascript:send(true)" style="width:200px;" class="button special small">Send to friend</a><a style="margin-left:20px; width:200px;" href="javascript:send(false)" class="button special small">Send from friend</a><a style="margin-left:20px; width:200px;" href="javascript:reset()" class="button small">Reset</a></div>
+								<div style="display:inline"><label for="amount">Amount to send:</label><input id="amount" type="text" style="width:150px" value="75"></input><br><a href="javascript:send(true)" style="width:200px" class="button special small bank-button">Send to friend</a><a style="margin-left:20px; width:200px;" href="javascript:send(false)" class="button special small bank-button">Send from friend</a><a style="margin-left:20px; width:200px;" href="javascript:reset()" class="button small bank-button">Reset</a></div>
 								<br><br><p>It might be easy enough when there&#39;s a 1-second delay for all requests. What about a more realistic scenario, where it&#39;s just a matter of milliseconds? I encourage you to test this out by firing up <a href='https://portswigger.net/burp/help/suite_gettingstarted.html' target='_blank'>Burp Suite</a> and doing the following.</p>
 <ol start='' >
 <li>Turn on intercept mode and intercept the request to send money.</li>
@@ -93,7 +88,7 @@
 <h4>Coupons</h4>
 <p>Another functionality to keep an eye out for occurs when redeeming coupons or other single-use items. For example, I identified <a href='https://hackerone.com/reports/157996' target="_blank">a vulnerability on Instacart</a> that allowed me to redeem the same coupon multiple times. Interestingly, I was able to bypass the initial patch by testing two different coupons, demonstrating that race conditions are not always simple to patch.</p>
 <h4>Voting Systems</h4>
-<p>Other examples of race conditions often occur with voting systems when a user should only be able to cast one vote. Such a flaw affected sites such as <a href='https://lightningsecurity.io/blog/how-i-hacked-mediums-top-stories/' target="_blank">Medium</a>, <a href='https://hackerone.com/reports/109485' target="_blank">Zendesk</a>, <a href='https://hackerone.com/reports/106360' target="_blank">Coinbase</a>, and <a href='https://hackerone.com/reports/152717' target="_blank">Urban Dictionary</a>.</p>
+<p>Other examples of race conditions often occur with voting systems when a user should only be able to cast one vote. Such a flaw affected sites such as <a href='https://cablej.github.io/blog/how-i-hacked-mediums-top-stories/' target="_blank">Medium</a>, <a href='https://hackerone.com/reports/109485' target="_blank">Zendesk</a>, <a href='https://hackerone.com/reports/106360' target="_blank">Coinbase</a>, and <a href='https://hackerone.com/reports/152717' target="_blank">Urban Dictionary</a>.</p>
 <h4>Edge Cases</h4>
 <p>Race conditions aren&#39;t limited to these specific examples, and thinking outside the box can often lead to unexpected results. For instance, I discovered a race condition in a private program when executing a unique action twice that would expose an SQL query. This was due to the database item being flagged as unique, causing the database to return an error.</p>
 <p></p>
@@ -143,6 +138,7 @@
 									var token = guid();
 									document.cookie = "token=" + token;
 									jQuery.postJSON(API + "session", { token: token }, function(data) {
+										updateBalance();
 									})
 								}
 
@@ -201,7 +197,7 @@
 				</div>
 
 			<!-- Footer -->
-				<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
+				<!--<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
 					<div class="container">
 						<header>
 							<h2>Like our findings? They could be yours.</h2>
@@ -222,14 +218,12 @@
 							</div>
 						</div>
 					</div>
-				</section>
+				</section>-->
 				<footer id="footer">
 					<ul class="icons">
-						<li><a href="mailto:jackhcable@gmail.com" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+						<li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
 					</ul>
-					<ul class="copyright">
-						<li>&copy; Jack Cable LLC. All rights reserved.</li>
-					</ul>
+					
 				</footer>
 
 		</div>
@@ -242,30 +236,6 @@
 			<script src="../../assets/js/util.js"></script>
 			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="../../assets/js/main.js"></script>
-			<script>
-				var email = 'jackhcable@gmail.com'
-				function onSubmitForm() {
-					$.ajax({
-					    url: "https://formspree.io/" + email, 
-					    method: "POST",
-					    data: {
-					    	'email': $('#email').val(),
-							'_replyto': $('#email').val(),
-					    	'_subject': '[Lightning Security] Contact from ' + $('#name').val(),
-					    	'name': $('#name').val(),
-					    	'_format': 'plain',
-					    	'message': $('#message').val()
-					    },
-					    dataType: "json",
-					    success: function() {
-					    	$('#result').text('Thanks for contacting us! We will reply within 24 hours.')
-					    },
-					    error: function() {
-					    	$('#result').html('Error sending message, please try again or email <a style="color:white" href="mailto:' + email + '">' + email + '</a>.')
-					    }
-					});
-				}
-			</script>
 			<script>window.twttr = (function(d, s, id) {
 			  var js, fjs = d.getElementsByTagName(s)[0],
 			    t = window.twttr || {};

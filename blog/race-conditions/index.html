@@ -1,0 +1,257 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Exploiting and Protecting Against Race Conditions</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+
+	  <meta name="author" content="Jack Cable">
+		<meta name="description" content="Race conditions are a severe but prevalent vulnerability type. Learn how to both exploit and protect against race conditions.">
+
+		<meta name="og:title" content="Exploiting and Protecting Against Race Conditions">
+		<meta property="og:image" content="http://cablej.github.io/images/banner.jpg">
+
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-104087512-1', 'auto');
+		  ga('send', 'pageview');
+
+		</script>
+		<script src="../../assets/js/jquery.min.js"></script>
+	</head>
+	<body>
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<header id="header">
+					<h1 id="logo"><a href="/">Jack Cable - Blog</a></h1>
+					<nav id="nav">
+						<ul>
+							<li><a href="/">Index</a></li>
+						</ul>
+					</nav>
+				</header>
+
+			<!-- Main -->
+				<div id="main" class="wrapper style1">
+					<div class="container">
+						<header class="major">
+							<h1 class="blog-title" style="font-size:1.75em">Exploiting and Protecting Against Race Conditions</h1>
+							<p>Jack Cable - November 1, 2017</p>
+						</header>
+
+						<!-- Content -->
+							<section id="content" class="blog-content">
+								<p>A race condition is a lesser known but fairly prevalent vulnerability type. Through this post, I hope to raise awareness about both exploiting and protecting against race conditions on the web.</p>
+								<h3>What is a race condition?</h3>
+								<p>Race conditions occur when there is a delay between an application checking a value and updating the value. For instance, consider a simplified example of an online bank. You have $100 in your account and a friend has $0. You can send up to $100 to the friend, but no more… right?</p>
+								<p>The company&#39;s code might look something like this:</p>
+<pre style="background:#181818;color:#f8f8f8;padding-left:20px">balance <span style="color:#cda869">=</span> queryUserBalance()
+<span style="color:#cda869">if</span> (balance <span style="color:#cda869">&lt;=</span> amountToSend) {
+    send_money()
+} <span style="color:#cda869">else</span> {
+    error(<span style="color:#8f9d6a">"Not enough money :("</span>)
+}
+</pre>
+
+								
+								<p>Observe that <code>queryUserBalance</code> is a synchronous function, so there is some time between when the server gets the user&#39;s balance from the database and when it modifies the value.</p>
+								<p>What would happen if we sent two requests to send $100 at the same time, give or take a few milliseconds? Since there is a delay between when the server checks your balance and sends the money, both times it looks like you have enough money in your account. If you&#39;re sending $100 with both requests, you would end up with $-100 in your account and your friend would get $200. Good news for you, really bad news for the bank.</p>
+								<h3>Demo</h3>
+								<p>Want to try out exploiting a race condition yourself? The following is an interactive demo of a real-life scenario of a race condition. You start out with $100 in your bank account and can send money between your account and a friend&#39;s. Your goal is to end up with more than $100 in one of the accounts :)</p>
+								<p>Now, there&#39;s a few ways to go about exploiting this. First, try hitting the button multiple times quickly. For demonstration purposes, I&#39;ve added a 1 second latency to the database queries, so there should be more than enough time to exploit this.</p>
+								<p id="error"></p>
+								<p>Your account balance: $<span id="your-balance"></span> - <a href="javascript:updateBalance()">Refresh balance</a></p>
+								<p>Your friend&#39;s account: $<span id="friends-balance"></span></p>
+								<div style="display:inline"><label for="amount">Amount to send:</label><input id="amount" type="text" style="width:150px" value="75"></input><br><a href="javascript:send(true)" style="width:200px" class="button special small bank-button">Send to friend</a><a style="margin-left:20px; width:200px;" href="javascript:send(false)" class="button special small bank-button">Send from friend</a><a style="margin-left:20px; width:200px;" href="javascript:reset()" class="button small bank-button">Reset</a></div>
+								<br><br><p>It might be easy enough when there&#39;s a 1-second delay for all requests. What about a more realistic scenario, where it&#39;s just a matter of milliseconds? I encourage you to test this out by firing up <a href='https://portswigger.net/burp/help/suite_gettingstarted.html' target='_blank'>Burp Suite</a> and doing the following.</p>
+<ol start='' >
+<li>Turn on intercept mode and intercept the request to send money.</li>
+<li>Right click the request, and copy it as a curl command.</li>
+<li>Execute the request on the command line in the form <code>(command) &amp; (command) &amp; (command)</code> as many times as you would like. This executes the command asynchronously.</li>
+
+</ol>
+<h3>Examples</h3>
+<p>Here&#39;s some of the more impactful instances of race conditions I&#39;ve found.</p>
+<h4>ChangeTip - race condition in transferring money</h4>
+<p>In ChangeTip, a now-defunct bitcoin tipping site, users could transfer money between their bitcoin and dollar balances. I discovered a race condition in transfering money between the balances, allowing me to obtain an infinite amount of money in my account:</p>
+<img class="medium" src="../images/post3-screenshot1.png" />
+<p>Financial websites are often prone to race conditions; I&#39;ve found race conditions in multiple bitcoin sites allowing infinite withdrawal of money.</p>
+<h4>Coupons</h4>
+<p>Another functionality to keep an eye out for occurs when redeeming coupons or other single-use items. For example, I identified <a href='https://hackerone.com/reports/157996' target="_blank">a vulnerability on Instacart</a> that allowed me to redeem the same coupon multiple times. Interestingly, I was able to bypass the initial patch by testing two different coupons, demonstrating that race conditions are not always simple to patch.</p>
+<h4>Voting Systems</h4>
+<p>Other examples of race conditions often occur with voting systems when a user should only be able to cast one vote. Such a flaw affected sites such as <a href='https://cablej.github.io/blog/how-i-hacked-mediums-top-stories/' target="_blank">Medium</a>, <a href='https://hackerone.com/reports/109485' target="_blank">Zendesk</a>, <a href='https://hackerone.com/reports/106360' target="_blank">Coinbase</a>, and <a href='https://hackerone.com/reports/152717' target="_blank">Urban Dictionary</a>.</p>
+<h4>Edge Cases</h4>
+<p>Race conditions aren&#39;t limited to these specific examples, and thinking outside the box can often lead to unexpected results. For instance, I discovered a race condition in a private program when executing a unique action twice that would expose an SQL query. This was due to the database item being flagged as unique, causing the database to return an error.</p>
+<p></p>
+<p></p>
+<p>In short, you should look for race conditions whenever a one-time action occurs, whether sending money, redeeming coupons, or casting a vote.</p>
+<h3>Prevention</h3>
+<p>Now that we&#39;ve gotten a sense of the potential impact of race conditions, how can we build secure code that prevents this? Going back to the demo, which was written using Node.js, the server does the following:</p>
+<ol start='' >
+<li>Check that the user has enough money in their account.</li>
+<li>[latency when performing database lookups]</li>
+<li>Subtract the amount to send from the user&#39;s balance, and add it to the friend&#39;s account.</li>
+
+</ol>
+<p>One common solution to prevent race conditions is known as locking. This ensures that at any given time, at most one thread can modify the database. Many databases provide functionality to lock a given row when a thread is accessing it.
+
+<p>In the case of the demo, it would be appropriate to verify the balance of the user directly before sending money. This is another type of locking, where the query to send money includes logic to send only if the account has enough money.</p>
+
+<hr>
+<p>From here, I encourage you to test out race conditions for yourself. Feel free to reach out to me via <a href="http://twitter.com/jackhcable" target="_blank">twitter</a> if you have any questions.</p>
+								<br><br><br>
+								<center><a class="twitter-follow-button"
+								  href="https://twitter.com/jackhcable">
+								Follow @jackhcable</a></center>
+							</section>
+							<script>
+
+								jQuery["postJSON"] = function( url, data, callback, error = function() {} ) {
+								    // shift arguments if data argument was omitted
+								    if ( jQuery.isFunction( data ) ) {
+								        callback = data;
+								        data = undefined;
+								    }
+								    return jQuery.ajax({
+								        url: url,
+								        type: "POST",
+								        contentType:"application/json; charset=utf-8",
+								        dataType: "json",
+								        data: JSON.stringify(data),
+								        success: callback,
+								        error: error
+								    });
+								};
+
+								var API = "https://race-condition-demo.herokuapp.com/api/";
+
+								if(!getCookie('token')) {
+									var token = guid();
+									document.cookie = "token=" + token;
+									jQuery.postJSON(API + "session", { token: token }, function(data) {
+										updateBalance();
+									})
+								}
+
+								token = getCookie('token');
+
+								updateBalance();
+
+								function updateBalance() {
+								  	jQuery.get(API + "session?token=" + token, function(data) {
+										$("#your-balance").text(data.balanceA);
+										$("#friends-balance").text(data.balanceB);
+								 	});
+								}
+
+								function reset() {
+									jQuery.postJSON(API + "session", { token: token }, function(data) {
+										$("#your-balance").text(data.balanceA);
+										$("#friends-balance").text(data.balanceB);
+									});
+								}
+
+								function send(sending) {
+									jQuery.postJSON(API + "send", {
+											token: token,
+											sending: sending,
+											amount: $("#amount").val()
+										}, function(data) {
+										$("#your-balance").text(data.balanceA);
+										$("#friends-balance").text(data.balanceB);
+									}, function(err) {
+										if(err.responseJSON && err.responseJSON.error) {
+											$("#error").text(err.responseJSON.error).fadeIn(500).delay(2500).fadeOut("slow");
+										}
+									});
+								}
+
+								function getCookie(name) {
+								  var value = "; " + document.cookie;
+								  var parts = value.split("; " + name + "=");
+								  if (parts.length == 2) return parts.pop().split(";").shift();
+								}
+
+								//don't worry, doesn't have to be truly random or safe :)
+								//and yes, it's generated client side, but does it really matter for a demo?
+								function guid() {
+								  function s4() {
+								    return Math.floor((1 + Math.random()) * 0x10000)
+								      .toString(16)
+								      .substring(1);
+								  }
+								  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+								    s4() + '-' + s4() + s4() + s4();
+								}
+							</script>
+					</div>
+				</div>
+
+			<!-- Footer -->
+				<!--<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
+					<div class="container">
+						<header>
+							<h2>Like our findings? They could be yours.</h2>
+							<p>Contact us for a quote and get results lightning fast.</p>
+						</header>
+						<div class="row uniform">
+							<div class="6u 12u$(xsmall)"><input type="text" name="name" id="name" placeholder="Name" /></div>
+							<div class="6u$ 12u$(xsmall)"><input type="email" name="_reply" id="email" placeholder="Email" /></div>
+							<input type="hidden" name="_format" value="plain" />
+							<div class="12u$"><textarea name="message" id="message" placeholder="Message" rows="2"></textarea></div>
+							<div class="12u$">
+								<ul class="actions">
+									<input type="submit" value="Submit" class="fit special" onclick="onSubmitForm()" />
+								</ul>
+							</div>
+							<div>
+								<center><p id="result"></p></center>
+							</div>
+						</div>
+					</div>
+				</section>-->
+				<footer id="footer">
+					<ul class="icons">
+						<li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					
+				</footer>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.scrolly.min.js"></script>
+			<script src="../../assets/js/jquery.dropotron.min.js"></script>
+			<script src="../../assets/js/jquery.scrollex.min.js"></script>
+			<script src="../../assets/js/skel.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="../../assets/js/main.js"></script>
+			<script>window.twttr = (function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0],
+			    t = window.twttr || {};
+			  if (d.getElementById(id)) return t;
+			  js = d.createElement(s);
+			  js.id = id;
+			  js.src = "https://platform.twitter.com/widgets.js";
+			  fjs.parentNode.insertBefore(js, fjs);
+			  //seriously, why are you reading comments in some random script tag?
+			  t._e = [];
+			  t.ready = function(f) {
+			    t._e.push(f);
+			  };
+
+			  return t;
+			}(document, "script", "twitter-wjs"));</script>
+
+	</body>
+</html>

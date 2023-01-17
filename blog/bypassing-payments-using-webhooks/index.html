@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Bypassing Payments Using Webhooks</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+    <link rel="stylesheet" href="../../assets/css/main.css" />
+
+    <meta name="description" content="Bypassing Payments Using Webhooks">
+
+    <meta name="og:title" content="Bypassing Payments Using Webhooks">
+    <meta property="og:image" content="https://cablej.github.io/images/stripe.png">
+
+    <!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+    <!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-104087512-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+    <script src="../../assets/js/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="page-wrapper">
+
+      <!-- Header -->
+        <header id="header">
+          <h1 id="logo"><a href="/">Jack Cable - Blog</a></h1>
+          <nav id="nav">
+            <ul>
+              <li><a href="/blog">Index</a></li>
+            </ul>
+          </nav>
+        </header>
+
+      <!-- Main -->
+        <div id="main" class="wrapper style1">
+          <div class="container">
+            <header class="major">
+              <h1 class="blog-title" style="font-size:1.75em">Bypassing Payments Using Webhooks</h1>
+              <p>Jack Cable - March 13, 2018</p>
+            </header>
+
+            <!-- Content -->
+              <section id="content" class="blog-content">
+       
+              <p>In diving deeper to find vulnerabilities in bug bounty programs, it is necessary to search for functionality not visible to the end user. Payment webhooks are one example, used by payment providers such as Stripe or Braintree to notify websites about updates to a user&#39;s subscription details. What&#39;s important is that a user never interacts with these webhook endpoints — all communication occurs directly between the payment provider and the server. This means that all too often a bug bounty hunter never even thinks to test against webhook functionality, missing out on potentially dangerous exploits.</p>
+              <h3>Finding</h3>
+              <p>While testing a site that offered a monthly subscription, I happened across the company&#39;s internal API documentation. One endpoint that immediately caught my eye was a <code>PUT</code> request to <code>/api/webhooks/stripe</code>. Based on my prior experience with payments providers, I wondered if I could send a fake request to this endpoint that would trick the website into thinking I paid.</p>
+              <p>Sending an empty JSON request returned an error. After looking into the format Stripe uses for webhooks, I sent the following body:</p>
+              <pre><code>{
+  &quot;payment&quot;: {
+    &quot;status&quot;:&quot;success&quot;,
+    &quot;provider&quot;:&quot;stripe&quot;
+  },
+  &quot;id&quot;:&quot;...&quot;
+}</code></pre>
+              <p>The server responded with a success:</p>
+              <pre><code>{
+  &quot;id&quot;:&quot;...&quot;,
+  &quot;amount&quot;:1,
+  &quot;status&quot;:&quot;success&quot;,
+  &quot;provider&quot;:&quot;stripe&quot;
+}
+</code></pre>
+              <p>And just like that, my account was authorized and appeared as having a paid subscription. This got me thinking: how often is such a vulnerability overlooked, and what are payment providers doing to prevent this?</p>
+              <h3>Prevention by Payment Providers</h3>
+              <p>Payment providers have the ability to prevent this vulnerability from ever happening, so it&#39;s surprising that endpoints do go unprotected. <a href='https://developers.braintreepayments.com/guides/webhooks/parse/node'>Braintree</a> is an example of the <em>right</em> way to do things: users must parse the incoming webhook through Braintree&#39;s library, which automatically validates the request and extracts the JSON body. This way, webhook endpoints are secure by default, and cannot be spoofed by attackers.</p>
+              <p>Stripe, the payment provider used by the company, is a little less foolproof when it comes to webhook security. Although Stripe does <a href='https://stripe.com/docs/webhooks'>mention</a> verifying webhook signatures, this is only as a sidenote, and there is little overall emphasis on the importance of ensuring that webhooks originate from Stripe. The example code listed in the documentation doesn&#39;t include any signature verification, instead directly parsing the JSON request.</p>                <img style="padding:10px; background-color: white;" class="large" src="../../images/stripe.png" />
+              <p>Not being secure by default is a tricky route. Users are likely to take the path of least resistance when creating payment integrations, meaning many will never verify incoming signatures.</p>
+              <p>Recurly, another subscription payment provider, <a href='https://docs.recurly.com/docs/webhooks'>offers</a> HTTP Basic Authentication to share a secret between the servers. Again, one has to ask if users will actually go through the trouble of verifying a shared secret. Additionally, Recurly offers a list of IP addresses that webhook requests will originate from. However, this alone is not sufficient: what if, for instance, an attacker creates a separate Recurly account to send malicious, but valid, webhooks?</p>
+              <p>Lastly, BitPay, a service to accept bitcoin payments, states, &quot;BitPay does not sign IPNs, so the information in the payload should not be trusted outright.&quot; Perhaps there&#39;s something to be said for being transparent about a lack of security — users, after all, are much more likely to question their security after reading this.</p>
+              <h3>Discovery</h3>
+              <p>An immediate cue to test for payment-related webhook vulnerabilities is when a company offers a monthly subscription. Depending on the payment provider (as outlined above), the site may not have implemented sufficient protection against attacks.</p>
+              <p>Some ways to find webhook endpoints:</p>
+              <ul>
+              <li>Search JavaScript files for &quot;webhook&quot; or &quot;payment&quot;. Companies may expose internal endpoints without realizing it.</li>
+              <li>Look through the organization&#39;s GitHub repos or similar to find references to webhooks.</li>
+              <li>The format for webhook endpoints usually follows a similar form, so it&#39;s worthwhile to try visiting different API endpoints such as <code>/api/stripe/webhook</code>, <code>/api/payments/webhook</code>, <code>/api/stripeWebhook</code>, etc.</li>
+
+              </ul>
+              <h3>Conclusion</h3>
+              <p>It goes without saying that verifying payment webhooks should be the default for any sensitive actions. Payment providers give their customers methods to protect against such attacks, but depending on the provider this still requires some effort from the customer.</p>
+              <p>In the meantime, why not start checking to see if a payment endpoint has been left misconfigured? And this isn&#39;t just limited to payments — any incoming webhook notifications for any service should be verified.</p>
+
+                <br><br><br>
+                <center><a class="twitter-follow-button"
+                  href="https://twitter.com/jackhcable">
+                Follow @jackhcable</a></center>
+              </section>
+              
+          </div>
+        </div>
+
+      <!-- Footer -->
+        <!-- <section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
+          <div class="container">
+            <header>
+              <h2>Like our findings? They could be yours.</h2>
+              <p>Contact us for a quote and get results lightning fast.</p>
+            </header>
+            <div class="row uniform">
+              <div class="6u 12u$(xsmall)"><input type="text" name="name" id="name" placeholder="Name" /></div>
+              <div class="6u$ 12u$(xsmall)"><input type="email" name="_reply" id="email" placeholder="Email" /></div>
+              <input type="hidden" name="_format" value="plain" />
+              <div class="12u$"><textarea name="message" id="message" placeholder="Message" rows="2"></textarea></div>
+              <div class="12u$">
+                <ul class="actions">
+                  <input type="submit" value="Submit" class="fit special" onclick="onSubmitForm()" />
+                </ul>
+              </div>
+              <div>
+                <center><p id="result"></p></center>
+              </div>
+            </div>
+          </div>
+        </section> -->
+        <footer id="footer">
+          <ul class="icons">
+            <li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+          </ul>
+        </footer>
+
+    </div>
+
+    <!-- Scripts -->
+      <script src="../../assets/js/jquery.scrolly.min.js"></script>
+      <script src="../../assets/js/jquery.dropotron.min.js"></script>
+      <script src="../../assets/js/jquery.scrollex.min.js"></script>
+      <script src="../../assets/js/skel.min.js"></script>
+      <script src="../../assets/js/util.js"></script>
+      <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+      <script src="../../assets/js/main.js"></script>
+      <script>window.twttr = (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0],
+          t = window.twttr || {};
+        if (d.getElementById(id)) return t;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://platform.twitter.com/widgets.js";
+        fjs.parentNode.insertBefore(js, fjs);
+        //seriously, why are you reading comments in some random script tag?
+        t._e = [];
+        t.ready = function(f) {
+          t._e.push(f);
+        };
+
+        return t;
+      }(document, "script", "twitter-wjs"));</script>
+
+  </body>
+</html>

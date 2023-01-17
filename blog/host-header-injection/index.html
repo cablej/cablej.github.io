@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Don't Trust the Host Header for Sending Password Reset Emails</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+
+	  <meta name="author" content="Jack Cable">
+		<meta name="description" content="Don't Trust the Host Header for Sending Password Reset Emails">
+
+		<meta name="og:title" content="Don't Trust the Host Header for Sending Password Reset Emails">
+		<meta property="og:image" content="http://cablej.github.io/images/banner.jpg">
+
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-104087512-1', 'auto');
+		  ga('send', 'pageview');
+
+		</script>
+		<script src="../../assets/js/jquery.min.js"></script>
+	</head>
+	<body>
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<header id="header">
+					<h1 id="logo"><a href="/">Jack Cable - Blog</a></h1>
+					<nav id="nav">
+						<ul>
+							<li><a href="/">Index</a></li>
+						</ul>
+					</nav>
+				</header>
+
+			<!-- Main -->
+				<div id="main" class="wrapper style1">
+					<div class="container">
+						<header class="major">
+							<h1 class="blog-title" style="font-size:1.75em">Don't Trust the Host Header for Sending Password Reset Emails</h1>
+							<p>Jack Cable - December 13, 2017</p>
+						</header>
+
+						<!-- Content -->
+							<section id="content" class="blog-content">
+<p>Let&#39;s say you&#39;re building password reset functionality into your website. Since your website url might change in the future, you want to dynamically generate the link in the password reset email to match your server&#39;s url. No problem, a quick Google search returns <a href='https://stackoverflow.com/questions/6768793/get-the-full-url-in-php' target="_blank">this StackOverflow question</a>  for getting the server&#39;s url in PHP. You add <code>$_SERVER[&#39;HTTP_HOST&#39;]</code> to your code and think nothing of it.</p>
+<p>If you haven&#39;t yet caught it, this is a really bad practice. The <code>Host</code> header is provided by the client, meaning an attacker could embed their own website in a password reset email, compromising any user&#39;s account. An attack scenario would look something like this:</p>
+<ol>
+<li>The attacker identifies a target user&#39;s email address.</li>
+<li>The attacker modifies the host header of the request to reset the target&#39;s password to their own domain.</li>
+<li>The target receives the following email:
+<img class="large" src="../images/post4-screenshot1.png" /></li>
+<li>Trusting the company, they click the reset link. As the link is formed with the host header, this instead links to the attacker&#39;s website. When the target visits this site, their password reset token is sent to the attacker.</li>
+<li>The attacker now resets the target&#39;s password using their password reset token.</li>
+
+</ol>
+<p>Unfortunately, this attack isn&#39;t purely theoretical, and I have found it in 4 bug bounty programs over the past few months.</p>
+<h3>Example - Mavenlink</h3>
+<p>On a whim, I decided to test for this vulnerability on Mavenlink, following their <a href='https://hackerone.com/mavenlink' target="_blank">public HackerOne program</a>.</p>
+<p>Mavenlink allows companies to register a subdomain of mavenlink.com to host their content, so it makes sense that they would need a way to dynamically determine the company&#39;s subdomain.</p>
+<p>I quickly noticed that I could set the host header to any subdomain of mavenlink.com, which would be reflected in the email. However, changing the domain from mavenlink.com would return an error and not send an email.</p>
+<p>At first, this seemed relatively secure. I couldn&#39;t find a way to inject my own domain — sure, I could add a random subdomain of mavenlink.com, but all of these redirected to the proper page.</p>
+<p>I then started testing special characters. After a few tries, I hit gold: the server would accept a question mark in the header, so I could follow my domain with a question mark to make that the base url:</p>
+<p><code>Host: example.com?.mavenlink.com</code></p>
+<p>This allowed me to steal any user&#39;s password reset token from the email:</p>
+<img class="large" src="../images/post4-screenshot2.png" />
+<p>View the disclosed report at <a href='https://hackerone.com/reports/281575' target='_blank' >https://hackerone.com/reports/281575.</a></p>
+<h3>Conclusion</h3>
+<p>Don&#39;t trust the <code>Host</code> header for sending password reset emails. Ever. And you probably shouldn&#39;t be trusting it for anything else, either.</p>
+<p>Instead, if you need to account for a dynamic url, it&#39;s a good idea to store the host as a server-side variable.</p>
+								<br><br><br>
+								<center><a class="twitter-follow-button"
+								  href="https://twitter.com/jackhcable">
+								Follow @jackhcable</a></center>
+							</section>
+							
+					</div>
+				</div>
+
+			<!-- Footer -->
+				<!--<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
+					<div class="container">
+						<header>
+							<h2>Like our findings? They could be yours.</h2>
+							<p>Contact us for a quote and get results lightning fast.</p>
+						</header>
+						<div class="row uniform">
+							<div class="6u 12u$(xsmall)"><input type="text" name="name" id="name" placeholder="Name" /></div>
+							<div class="6u$ 12u$(xsmall)"><input type="email" name="_reply" id="email" placeholder="Email" /></div>
+							<input type="hidden" name="_format" value="plain" />
+							<div class="12u$"><textarea name="message" id="message" placeholder="Message" rows="2"></textarea></div>
+							<div class="12u$">
+								<ul class="actions">
+									<input type="submit" value="Submit" class="fit special" onclick="onSubmitForm()" />
+								</ul>
+							</div>
+							<div>
+								<center><p id="result"></p></center>
+							</div>
+						</div>
+					</div>
+				</section>-->
+				<footer id="footer">
+					<ul class="icons">
+						<li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					
+				</footer>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.scrolly.min.js"></script>
+			<script src="../../assets/js/jquery.dropotron.min.js"></script>
+			<script src="../../assets/js/jquery.scrollex.min.js"></script>
+			<script src="../../assets/js/skel.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="../../assets/js/main.js"></script>
+			<script>window.twttr = (function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0],
+			    t = window.twttr || {};
+			  if (d.getElementById(id)) return t;
+			  js = d.createElement(s);
+			  js.id = id;
+			  js.src = "https://platform.twitter.com/widgets.js";
+			  fjs.parentNode.insertBefore(js, fjs);
+			  //seriously, why are you reading comments in some random script tag?
+			  t._e = [];
+			  t.ready = function(f) {
+			    t._e.push(f);
+			  };
+
+			  return t;
+			}(document, "script", "twitter-wjs"));</script>
+
+	</body>
+</html>

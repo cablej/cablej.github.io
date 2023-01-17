@@ -1,0 +1,254 @@
+@font-face {
+  font-family: 'Lato', sans-serif;
+}
+
+.front-page {
+  margin-right: 25px;
+  font-family: 'Lato';
+  font-size: 16px;
+}
+
+.inblog {
+  font-family: 'Lato';
+  font-weight: 400;
+  margin-right: 25px;
+}
+.inblog h3 {
+  margin-bottom: 5px;
+  font-size: 18px;
+  font-family: 'Lato';
+  font-weight: 310;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+a {
+  color: rgb(0, 53, 102);
+  font-weight: 500;
+  text-decoration: underline;
+}
+a:hover {
+  color: rgb(0, 53, 102);
+  text-decoration: underline;
+}
+
+.no-underline a {
+  text-decoration: none;
+}
+
+.top {
+  padding-top: 40px;
+}
+
+h2 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  margin-bottom: 4px;
+  margin-top: 0px;
+}
+
+h3 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+h4 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  margin-bottom: 20px;
+  margin-top: 30px;
+}
+
+h5 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  margin-bottom: 4px;
+  margin-top: 15px;
+}
+
+@media (min-width: 769px) {
+  p {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.3em;
+  }
+
+  h1 {
+    font-family: 'Lato', sans-serif;
+    font-weight: 500;
+    font-size: 2.31em;
+    margin-bottom: 15px;
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  p {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.25em;
+  }
+
+  h1 {
+    font-family: 'Lato', sans-serif;
+    font-weight: 500;
+    font-size: 2.31em;
+    margin-bottom: 15px;
+    margin-top: 10px;
+  }
+}
+
+.blog p {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  margin-bottom: 20px;
+  text-align: justify;
+  margin-top: 5px;
+}
+
+.blog h5 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  margin-bottom: 8px;
+  margin-top: 15px;
+}
+
+.venue {
+  padding-top: 3px;
+}
+
+pre {
+  margin-bottom: 20px;
+  padding-bottom: 5px;
+}
+
+.address {
+  margin: 15px 0 20px 60px;
+}
+.address li {
+  list-style-type: none;
+  margin-bottom: 3px;
+}
+
+.talk {
+  margin: 0 0 0 0;
+  font-family: 'Lato', sans-serif;
+}
+.talk ul {
+  margin: 0 0 0px 0px;
+}
+.talk li {
+  list-style-type: none;
+  margin: 0 0 0px 0px;
+  font-family: 'Lato', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+}
+
+.col {
+  width: 290px;
+  margin: 0 40px 8px 0;
+  float: left;
+  font-size: 0.95em;
+  padding: 0 0 0px 10px;
+}
+.col.last {
+  width: 615px;
+  margin-right: 0;
+  padding: 0 0 0 0;
+}
+
+#cv li {
+  list-style-type: none;
+}
+
+.cv h4 {
+  padding-top: 20px;
+}
+
+#footer {
+  clear: both;
+  border-top: 1px solid #ddd;
+  padding: 20px 0;
+  font-size: 0.9em;
+  color: #999;
+}
+
+img.displayed {
+  display: inline-block;
+  vertical-align: right;
+  float: none;
+  margin-right: auto;
+  padding-right: 0px;
+  margin-right: 0px;
+}
+
+code {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.blogtimestamp {
+  font-size: 13px;
+  color: #707070;
+}
+
+.post h1 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 500;
+  font-size: 35px;
+  margin-bottom: 15px;
+  margin-top: 10px;
+}
+
+.post h2 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 500;
+  font-size: 30px;
+  margin-bottom: 15px;
+  margin-top: 30px;
+}
+
+.post h3 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 500;
+  font-size: 25px;
+  margin-bottom: 15px;
+  margin-top: 30px;
+}
+
+.post h4 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  margin-bottom: 15px;
+  margin-top: 20px;
+}
+
+.post p {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.post pre {
+  margin-top: 20px;
+}
+
+.meta p {
+  font-size: 16px;
+  color: #909090;
+  padding-bottom: 5px;
+}
+
+.meta a {
+  color: #909090;
+}

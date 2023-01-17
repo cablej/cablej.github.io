@@ -1,0 +1,159 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Password Not Provided - Compromising Any Flurry User's Account</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+
+
+	  <meta name="author" content="Jack Cable">
+		<meta name="description" content="Password Not Provided - Compromising Any Flurry User's Account [Yahoo Bug Bounty]">
+
+		<meta name="og:title" content="Password Not Provided - Compromising Any Flurry User's Account [Yahoo Bug Bounty]">
+		<meta property="og:image" content="http://cablej.github.io/images/banner.jpg">
+
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-104087512-1', 'auto');
+		  ga('send', 'pageview');
+
+		</script>
+	</head>
+	<body>
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<header id="header">
+					<h1 id="logo"><a href="/">Jack Cable - Blog</a></h1>
+					<nav id="nav">
+						<ul>
+							<li><a href="/">Index</a></li>
+						</ul>
+					</nav>
+				</header>
+
+			<!-- Main -->
+				<div id="main" class="wrapper style1">
+					<div class="container">
+						<header class="major">
+							<h1 class="blog-title" style="font-size:1.75em">Password Not Provided - Compromising Any Flurry User's Account [Yahoo Bug Bounty]</h1>
+							<p>Jack Cable - August 15, 2017</p>
+						</header>
+
+						<!-- Content -->
+							<section id="content" class="blog-content">
+								<p>Since this was a simple bug, this is going to be a short write-up. What I hope makes this interesting is the impact, as this could have trivially allowed an attacker access to every Flurry account.</p>
+
+								<p>Let's begin...</p>
+
+								<p>In taking a look at Yahoo’s bug bounty program, I decided to check out Yahoo's Flurry platform, as it likely doesn’t get as much attention as core Yahoo.</p>
+
+								<p>The first step to testing an application, of course, is to create an account. Flurry has two options for creating an account, either to sign up with an email address or with an existing Yahoo account.</p>
+
+								<p>I chose to create my account with my Yahoo account, and followed the steps to do so. In the final step to create the account, I immediately noticed something suspicious. <em>Very suspicious.</em> Let's see if you can spot it:</p>
+
+								<img style="padding:10px; background-color: white;" class="large" src="../images/post2-screenshot1.png" />
+
+								<p>Did you catch it? The value of the password is being explicitly set to the string "not-provided". This couldn’t possibly actually be the user’s password, right?</p>
+
+								<p>Let’s find out. If we create a new user by email, the same password parameter is being used. So unless there’s a specific blacklist for "not-provided", then that could very well be the password for every user created with a Yahoo account. Logging in using "not-provided" as my password:</p>
+
+								<img style="padding:10px; background-color: white;" class="small" src="../images/post2-screenshot2.png" />
+
+								<p>To my surprise, it worked. This allowed for an attacker to log in to any Flurry account connected to Yahoo by entering their email and the password "not-provided". After testing with another brand new account, I promptly reported this to Yahoo, where they quickly triaged it as critical.</p>
+
+								<h3 id="impact">Impact</h3>
+
+								<p>As of 2017, Flurry was used in <a href="http://flurrymobile.tumblr.com/post/162044023226/play-longer-spend-more-gamers-become-serious" target="_blank">940,000 apps</a> and installed on 2.1 billion devices. Even if just some percent of developers have their Yahoo account connected, this would compromise the account of many app developers. Further, as Flurry involves an advertising network, this could have lead to stolen funds from apps.</p>
+
+								<h3 id="resolution">Resolution</h3>
+
+								<p>Yahoo provided a fix for this just 5 hours after the report by disabling accounts connected to Yahoo from logging in by email. I verified the fix, but I encourage you to double check it and see if you can find a bypass!</p>
+
+								<p>This type of misconfiguration might not be so uncommon. A simple oversight in specifying a user’s password lead to there being a "universal" password in the site. Though the developer intended to communicate that the user should not have a password set, verification was missing to ensure that "not-provided" could not actually be used as a password. This might be interesting to keep an eye out for in other OAuth implementations.</p>
+
+								<p>Once again, a fantastic response by Yahoo on this one.</p>
+								<hr>
+								<h3 id="timeline">Timeline</h3>
+
+								<p>6/30/17 17:53 UTC - Reported to Yahoo</p>
+								<p>6/30/17 19:25 UTC - Initial response + triage by Yahoo</p>
+								<p>6/30/17 22:51 UTC - Bug fix released by Yahoo</p>
+								<p>7/01/17 - Bounty decision pending</p>
+								<p>7/20/17 - Bounty awarded</p><br>
+								<center><a class="twitter-follow-button"
+								  href="https://twitter.com/jackhcable">
+								Follow @jackhcable</a></center>
+							</section>
+
+					</div>
+				</div>
+
+			<!-- Footer -->
+				<!--<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
+					<div class="container">
+						<header>
+							<h2>Like our findings? They could be yours.</h2>
+							<p>Contact us for a quote and get results lightning fast.</p>
+						</header>
+						<div class="row uniform">
+							<div class="6u 12u$(xsmall)"><input type="text" name="name" id="name" placeholder="Name" /></div>
+							<div class="6u$ 12u$(xsmall)"><input type="email" name="_reply" id="email" placeholder="Email" /></div>
+							<input type="hidden" name="_format" value="plain" />
+							<div class="12u$"><textarea name="message" id="message" placeholder="Message" rows="2"></textarea></div>
+							<div class="12u$">
+								<ul class="actions">
+									<input type="submit" value="Submit" class="fit special" onclick="onSubmitForm()" />
+								</ul>
+							</div>
+							<div>
+								<center><p id="result"></p></center>
+							</div>
+						</div>
+					</div>
+				</section>-->
+				<footer id="footer">
+					<ul class="icons">
+						<li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					
+				</footer>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/jquery.scrolly.min.js"></script>
+			<script src="../../assets/js/jquery.dropotron.min.js"></script>
+			<script src="../../assets/js/jquery.scrollex.min.js"></script>
+			<script src="../../assets/js/skel.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="../../assets/js/main.js"></script>
+			<script>window.twttr = (function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0],
+			    t = window.twttr || {};
+			  if (d.getElementById(id)) return t;
+			  js = d.createElement(s);
+			  js.id = id;
+			  js.src = "https://platform.twitter.com/widgets.js";
+			  fjs.parentNode.insertBefore(js, fjs);
+
+			  t._e = [];
+			  t.ready = function(f) {
+			    t._e.push(f);
+			  };
+
+			  return t;
+			}(document, "script", "twitter-wjs"));</script>
+
+	</body>
+</html>

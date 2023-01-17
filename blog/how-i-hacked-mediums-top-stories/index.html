@@ -1,0 +1,140 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>How I Hacked Medium’s Top Stories</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="How I Hacked Medium’s Top Stories">
+		
+	  <meta name="author" content="Jack Cable">
+		<meta name="og:title" content="How I Hacked Medium’s Top Stories">
+		<meta property="og:image" content="http://cablej.github.io/images/banner.jpg">
+
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		  ga('create', 'UA-104087512-1', 'auto');
+		  ga('send', 'pageview');
+
+		</script>
+	</head>
+	<body>
+		<div id="page-wrapper">
+
+			<!-- Header -->
+				<header id="header">
+					<h1 id="logo"><a href="/">Jack Cable - Blog</a></h1>
+					<nav id="nav">
+						<ul>
+							<li><a href="/">Index</a></li>
+						</ul>
+					</nav>
+				</header>
+
+			<!-- Main -->
+				<div id="main" class="wrapper style1">
+					<div class="container">
+						<header class="major">
+							<h1 class="blog-title">How I Hacked Medium’s Top Stories</h1>
+							<p>Jack Cable - August 7, 2017</p>
+						</header>
+
+						<!-- Content -->
+							<section id="content" class="blog-content">
+								<p>Note: This is being published with the permission of Medium under the responsible disclosure policy. The vulnerability is now fixed.</p>
+								<p>If you&rsquo;re familiar with Medium, you&rsquo;ll know that any user can recommend a post as a way of &ldquo;liking&rdquo; it. Top stories, sorted by the number of recommendations, are then shown in Medium&rsquo;s <a href="https://medium.com/top-stories" target="_blank" data-href="https://medium.com/top-stories">&ldquo;top stories&rdquo;</a> section.</p>
+								<img src="https://cdn-images-1.medium.com/max/800/1*cTu7Gt_PBD5DoOfsL7B83A.png" alt="" />
+								<p>I discovered Medium&rsquo;s <a href="https://medium.com/policy/mediums-bug-bounty-disclosure-program-34b1c80764c2#.9d0bn1jkd" target="_blank" data-href="https://medium.com/policy/mediums-bug-bounty-disclosure-program-34b1c80764c2#.9d0bn1jkd">Bug Bounty Program</a> and decided that I&rsquo;d take a look around. One common issue in websites is known as a race condition, which allows users to perform actions more than allowed. Race conditions can be a huge problem for services dealing with money, and even affected <a href="http://sakurity.com/blog/2015/05/21/starbucks.html" target="_blank" rel="noopener" data-href="http://sakurity.com/blog/2015/05/21/starbucks.html">Starbucks</a> to add an infinite balance to a gift card. It works like this:</p>
+								<ol>
+								<li>A user makes, say, 10 requests to a website to perform an action at the same exact time. In the context of a bank account, let&rsquo;s say this user sends $10 10 times to User B, while they only have $10 in their bank account.</li>
+								<li>The bank receives these requests, and checks if the user has enough money in their account. As these requests were made at the same time, the bank returns that the user does have enough money for all 10 transactions.</li>
+								<li>The user has now sent 10 $10 transactions, which means that they have -$90 in their account. User B, then has $100 in their account, even though there was only $10 to start with.</li>
+								</ol>
+								<p>I discovered the same vulnerability in Medium. After concurrently recommending a comment 10 times, I noticed that Medium didn&rsquo;t check for other requests at the same time:</p>
+								<img src="https://cdn-images-1.medium.com/max/800/1*s6yybl3mkHoLnceOh9x0MA.png" alt="" />
+								<p>Given that Medium sorts top stories by total number of recommendations, I was able to boost my story to one of the top spots.</p>
+								<img src="https://cdn-images-1.medium.com/max/800/1*E9DLpZmwgoKBL7AbkaCW0g.png" alt="" />
+								<p>Internet fame forever!</p>
+								<hr />
+								<h3>Timeline:</h3>
+								<p>12/19/15 &mdash; Reported to Medium</p>
+								<p>1/4/16 &mdash; Response from Medium acknowledging vulnerability and bounty rewarded</p>
+								<p>1/13/16 &mdash; Disclosure requested</p>
+								<p>1/14/16 &mdash; Disclosure accepted</p>
+								<hr />
+								<p>Overall, great experience with Medium with timely responses.</p>
+								<center><a class="twitter-follow-button"
+								  href="https://twitter.com/jackhcable">
+								Follow @jackhcable</a></center>
+							</section>
+
+					</div>
+				</div>
+
+			<!-- Footer -->
+				<!--<section id="five" style="padding:2em 1em 0em 1em" class="wrapper style2 special fade">
+					<div class="container">
+						<header>
+							<h2>Like our findings? They could be yours.</h2>
+							<p>Contact us for a quote and get results lightning fast.</p>
+						</header>
+						<div class="row uniform">
+							<div class="6u 12u$(xsmall)"><input type="text" name="name" id="name" placeholder="Name" /></div>
+							<div class="6u$ 12u$(xsmall)"><input type="email" name="_reply" id="email" placeholder="Email" /></div>
+							<input type="hidden" name="_format" value="plain" />
+							<div class="12u$"><textarea name="message" id="message" placeholder="Message" rows="2"></textarea></div>
+							<div class="12u$">
+								<ul class="actions">
+									<input type="submit" value="Submit" class="fit special" onclick="onSubmitForm()" />
+								</ul>
+							</div>
+							<div>
+								<center><p id="result"></p></center>
+							</div>
+						</div>
+					</div>
+				</section>-->
+				<footer id="footer">
+					<ul class="icons">
+						<li><a href="mailto:cablej@stanford.edu" class="icon alt fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+					
+				</footer>
+
+		</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/jquery.scrolly.min.js"></script>
+			<script src="../../assets/js/jquery.dropotron.min.js"></script>
+			<script src="../../assets/js/jquery.scrollex.min.js"></script>
+			<script src="../../assets/js/skel.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="../../assets/js/main.js"></script>
+			<script>window.twttr = (function(d, s, id) {
+			  var js, fjs = d.getElementsByTagName(s)[0],
+			    t = window.twttr || {};
+			  if (d.getElementById(id)) return t;
+			  js = d.createElement(s);
+			  js.id = id;
+			  js.src = "https://platform.twitter.com/widgets.js";
+			  fjs.parentNode.insertBefore(js, fjs);
+
+			  t._e = [];
+			  t.ready = function(f) {
+			    t._e.push(f);
+			  };
+
+			  return t;
+			}(document, "script", "twitter-wjs"));</script>
+
+	</body>
+</html>
